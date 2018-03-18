@@ -1,6 +1,8 @@
 const path = require('path')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const webpack = require('webpack')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 module.exports = {
   entry: {
@@ -10,7 +12,6 @@ module.exports = {
     path: path.resolve('dist'),
     filename: '[name].bundle.js'
   },
-  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -41,6 +42,7 @@ module.exports = {
     extensions: ['.js', '.css', '.scss']
   },
   plugins: [
+    new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
       template: './client/index.html',
       filename: 'index.html',
@@ -49,6 +51,10 @@ module.exports = {
     }),
     new ExtractTextPlugin({
       filename: '[name].bundle.css'
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: module => /node_modules/.test(module.resource)
     })
   ]
 }
