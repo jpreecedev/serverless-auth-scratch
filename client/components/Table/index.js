@@ -11,7 +11,7 @@ const Table = ({ entries }) => {
       <tbody>
         {entries.map(entry => {
           return (
-            <tr>
+            <tr key={entry}>
               <td>{entry}</td>
             </tr>
           )

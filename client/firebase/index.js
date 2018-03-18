@@ -1,5 +1,6 @@
 import * as firebase from 'firebase'
 import 'firebase/auth'
+import 'firebase/database'
 
 const config = {
   apiKey: 'AIzaSyAv0zPLVRxjflWQlSmE6LE522vlkkRyOho',
@@ -14,6 +15,7 @@ firebase.initializeApp(config)
 
 export const provider = new firebase.auth.GoogleAuthProvider()
 export const auth = firebase.auth()
+export const database = firebase.database()
 
 export function authenticateUser() {
   return auth.signInWithPopup(provider)

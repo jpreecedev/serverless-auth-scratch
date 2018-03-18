@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { auth, authenticateUser } from '../../firebase'
+import { auth, authenticateUser, database } from '../../firebase'
 import Table from '../Table'
 
 class App extends React.Component {
@@ -11,8 +11,30 @@ class App extends React.Component {
       username: null,
       accessToken: null,
       refreshToken: null,
-      isAuthenticating: true
+      uid: null,
+      isAuthenticating: true,
+      entries: []
     }
+  }
+
+  wait = () => {
+    const { uid } = this.state
+
+    if (!uid) {
+      return
+    }
+
+    database.ref(`entries/${uid}/`).on('value', snapshot => {
+      const val = snapshot.val()
+      if (val) {
+        const entries = Object.entries(val).map(entry => {
+          return entry[1].date
+        })
+        this.setState({
+          entries: [...entries]
+        })
+      }
+    })
   }
 
   componentDidMount() {
@@ -21,10 +43,23 @@ class App extends React.Component {
         this.setState({
           displayName: user.displayName,
           refreshToken: user.refreshToken,
+          uid: user.uid,
           accessToken: null,
           isAuthenticating: false
         })
+
+        this.wait()
       }
+    })
+  }
+
+  addEntry = () => {
+    const { uid } = this.state
+
+    const ref = database.ref(`entries/${uid}/`)
+    const newRef = ref.push()
+    newRef.set({
+      date: new Date().toISOString()
     })
   }
 
@@ -38,14 +73,22 @@ class App extends React.Component {
         displayName: result.user.displayName,
         accessToken: result.credential.accessToken,
         refreshToken: null,
+        uid: null,
         isAuthenticating: false
       })
+
+      this.wait()
     })
   }
 
   render() {
-    const { isAuthenticating, displayName, refreshToken, accessToken } = this.state
-    const entries = []
+    const {
+      isAuthenticating,
+      displayName,
+      refreshToken,
+      accessToken,
+      entries
+    } = this.state
 
     return (
       <div>
@@ -59,6 +102,7 @@ class App extends React.Component {
             )}
             {displayName && <p>{displayName}</p>}
             {entries && entries.length > 0 && <Table entries={entries} />}
+            <button onClick={this.addEntry}>Add entry</button>
           </React.Fragment>
         )}
       </div>
