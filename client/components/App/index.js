@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { auth, authenticateUser } from '../../firebase'
+import Table from '../Table'
 
 class App extends React.Component {
   constructor(props) {
@@ -9,7 +10,8 @@ class App extends React.Component {
     this.state = {
       username: null,
       accessToken: null,
-      refreshToken: null
+      refreshToken: null,
+      isAuthenticating: true
     }
   }
 
@@ -19,31 +21,47 @@ class App extends React.Component {
         this.setState({
           displayName: user.displayName,
           refreshToken: user.refreshToken,
-          accessToken: null
+          accessToken: null,
+          isAuthenticating: false
         })
       }
     })
   }
 
   authenticate = () => {
+    this.setState({
+      isAuthenticating: true
+    })
+
     authenticateUser().then(result => {
       this.setState({
         displayName: result.user.displayName,
         accessToken: result.credential.accessToken,
-        refreshToken: null
+        refreshToken: null,
+        isAuthenticating: false
       })
     })
   }
 
   render() {
-    const { displayName } = this.state
+    const { isAuthenticating, displayName, refreshToken, accessToken } = this.state
+    const entries = []
 
     return (
-      <header>
-        <h1>Firebase Authentication</h1>
-        <button onClick={this.authenticate}>Authenticate</button>
-        {displayName && <p>{displayName}</p>}
-      </header>
+      <div>
+        <header>
+          <h1>Firebase Authentication</h1>
+        </header>
+        {!isAuthenticating && (
+          <React.Fragment>
+            {!(refreshToken || accessToken) && (
+              <button onClick={this.authenticate}>Authenticate</button>
+            )}
+            {displayName && <p>{displayName}</p>}
+            {entries && entries.length > 0 && <Table entries={entries} />}
+          </React.Fragment>
+        )}
+      </div>
     )
   }
 }
