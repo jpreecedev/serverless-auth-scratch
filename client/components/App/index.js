@@ -12,7 +12,7 @@ class App extends React.Component {
       accessToken: null,
       refreshToken: null,
       uid: null,
-      isAuthenticating: true,
+      isAuthenticating: false,
       entries: []
     }
   }
@@ -102,7 +102,9 @@ class App extends React.Component {
             )}
             {displayName && <p>{displayName}</p>}
             {entries && entries.length > 0 && <Table entries={entries} />}
-            <button onClick={this.addEntry}>Add entry</button>
+            {(refreshToken || accessToken) && (
+              <button onClick={this.addEntry}>Add entry</button>
+            )}
           </React.Fragment>
         )}
       </div>
